@@ -1,33 +1,44 @@
 # DevFlow Agent
 
-DevFlow Agent is an AI agent project for the Google Cloud Rapid Agent Hackathon. It helps developers understand GitLab project activity faster by summarizing issues, merge requests, CI signals, blockers, risks, and recommended next actions.
+DevFlow Agent is a small Google Cloud Rapid Agent Hackathon MVP that helps developers turn GitLab project activity into a concise project readout.
 
-## Problem
+The current app is intentionally demo-focused. It accepts pasted GitLab context such as issue notes, merge request updates, CI failures, or project summaries and returns mock analysis for:
 
-Developers often spend too much time checking project updates before they know what actually needs attention. Issues, merge requests, failed pipelines, and scattered comments can make it hard to see the real project status quickly.
+- blockers
+- risks
+- recommended next actions
+- daily standup summary
 
-## Solution
+## Tech Stack
 
-DevFlow Agent turns GitLab project activity into clear engineering updates. The goal is to help developers and small teams understand what is blocked, what needs review, and what should happen next.
-
-## Planned Features
-
-- Analyze GitLab issues and merge requests
-- Summarize blockers and risks
-- Generate daily standup updates
-- Highlight missing tests or risky changes
-- Suggest next actions for developers
-
-## Built With
-
-- Gemini
-- Google Cloud Agent Builder
-- GitLab MCP
-- GitLab
 - React
 - TypeScript
-- Node.js
+- Vite
 
-## Hackathon
+## Local Setup
 
-Built for the Google Cloud Rapid Agent Hackathon.
+Install dependencies:
+
+```bash
+npm install
+```
+
+Start the local development server:
+
+```bash
+npm run dev
+```
+
+Build for production:
+
+```bash
+npm run build
+```
+
+## MVP Notes
+
+This first version uses mock analysis only. The next integration points are marked with TODO comments in the code:
+
+- Gemini-powered project analysis
+- Google Cloud Agent Builder orchestration
+- GitLab MCP integration for live project context
