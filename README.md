@@ -2,18 +2,21 @@
 
 DevFlow Agent is a small Google Cloud Rapid Agent Hackathon MVP that helps developers turn GitLab project activity into a concise project readout.
 
-The current app is intentionally demo-focused. It accepts pasted GitLab context such as issue notes, merge request updates, CI failures, or project summaries and returns mock analysis for:
+The current app is intentionally demo-focused. It accepts pasted GitLab context such as issue notes, merge request updates, CI failures, or project summaries and returns analysis for:
 
 - blockers
 - risks
 - recommended next actions
 - daily standup summary
 
+Gemini analysis is the first real integration step. If Gemini is unavailable or the API key is missing, the app clearly falls back to mock/demo analysis so the MVP still works.
+
 ## Tech Stack
 
 - React
 - TypeScript
 - Vite
+- Vercel serverless API route
 
 ## Local Setup
 
@@ -23,11 +26,23 @@ Install dependencies:
 npm install
 ```
 
-Start the local development server:
+Start the local Vite development server:
 
 ```bash
 npm run dev
 ```
+
+The frontend will run without an API key and will use mock fallback analysis if `/api/analyze` is unavailable.
+
+To test the Vercel API route locally, run the app with Vercel CLI and provide the Gemini API key in `.env.local`:
+
+```bash
+GEMINI_API_KEY=your_api_key_here
+```
+
+Required environment variable:
+
+- `GEMINI_API_KEY`: Google Gemini API key used only by the serverless API route.
 
 Build for production:
 
@@ -37,8 +52,7 @@ npm run build
 
 ## MVP Notes
 
-This first version uses mock analysis only. The next integration points are marked with TODO comments in the code:
+This version includes a minimal Gemini API route plus mock fallback behavior. The next integration points are marked with TODO comments in the code:
 
-- Gemini-powered project analysis
 - Google Cloud Agent Builder orchestration
 - GitLab MCP integration for live project context

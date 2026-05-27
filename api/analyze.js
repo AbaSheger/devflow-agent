@@ -1,0 +1,136 @@
+function buildFallbackAnalysis(input) {
+  const normalizedInput = input.toLowerCase();
+  const hasCiFailure = /ci|pipeline|test|failed|failure|build/.test(normalizedInput);
+  const hasReviewSignal = /merge request|mr|review|approval/.test(normalizedInput);
+  const hasBlockerSignal = /blocker|blocked|waiting|dependency|cannot/.test(normalizedInput);
+
+  return {
+    blockers: hasBlockerSignal
+      ? ['A dependency or handoff appears to be blocking progress.']
+      : ['No explicit blocker found in the pasted notes.'],
+    risks: [
+      hasCiFailure
+        ? 'CI or test failures may delay merge readiness.'
+        : 'CI health is unknown from the provided text.',
+      hasReviewSignal
+        ? 'Merge requests may need reviewer attention.'
+        : 'Review status is unclear and should be confirmed.',
+    ],
+    nextActions: [
+      hasCiFailure ? 'Identify the failing job and assign an owner.' : 'Add current CI status to the project notes.',
+      hasReviewSignal ? 'Ask reviewers to confirm approval or requested changes.' : 'List active merge requests before the next check-in.',
+      'Capture one concrete owner for each open blocker.',
+    ],
+    standupSummary:
+      input.trim().length > 0
+        ? 'Project activity was reviewed. Focus today should be clearing blockers, confirming CI status, and moving merge requests toward review or merge.'
+        : 'No project context has been provided yet. Paste GitLab notes to generate a demo summary.',
+  };
+}
+
+function fallbackResponse(res, input, message, statusCode = 200) {
+  return res.status(statusCode).json({
+    analysis: buildFallbackAnalysis(input),
+    source: 'mock',
+    error: message,
+  });
+}
+
+function normalizeAnalysis(value) {
+  return {
+    blockers: Array.isArray(value?.blockers) ? value.blockers.map(String) : [],
+    risks: Array.isArray(value?.risks) ? value.risks.map(String) : [],
+    nextActions: Array.isArray(value?.nextActions) ? value.nextActions.map(String) : [],
+    standupSummary: typeof value?.standupSummary === 'string' ? value.standupSummary : '',
+  };
+}
+
+function hasUsableAnalysis(analysis) {
+  return (
+    analysis.blockers.length > 0 ||
+    analysis.risks.length > 0 ||
+    analysis.nextActions.length > 0 ||
+    analysis.standupSummary.trim().length > 0
+  );
+}
+
+export default async function handler(req, res) {
+  if (req.method !== 'POST') {
+    res.setHeader('Allow', 'POST');
+    return res.status(405).json({ error: 'Method not allowed. Use POST.' });
+  }
+
+  const context = typeof req.body?.context === 'string' ? req.body.context : '';
+
+  if (!context.trim()) {
+    return fallbackResponse(res, context, 'No project context was provided.');
+  }
+
+  const apiKey = process.env.GEMINI_API_KEY;
+
+  if (!apiKey) {
+    return fallbackResponse(res, context, 'GEMINI_API_KEY is not configured. Returned mock analysis instead.');
+  }
+
+  const prompt = [
+    'Analyze the pasted GitLab project context for a developer standup.',
+    'Return only JSON with this exact shape:',
+    '{"blockers": string[], "risks": string[], "nextActions": string[], "standupSummary": string}',
+    'Keep items concise, practical, and grounded only in the provided context.',
+    'Do not claim live GitLab access.',
+    '',
+    'Project context:',
+    context,
+  ].join('\n');
+
+  try {
+    // TODO: Connect Google Cloud Agent Builder here when orchestration is added.
+    // TODO: Replace pasted context with live GitLab MCP project context when that integration is added.
+    const geminiResponse = await fetch('https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'x-goog-api-key': apiKey,
+      },
+      body: JSON.stringify({
+        contents: [
+          {
+            role: 'user',
+            parts: [{ text: prompt }],
+          },
+        ],
+        generationConfig: {
+          responseMimeType: 'application/json',
+          responseSchema: {
+            type: 'OBJECT',
+            properties: {
+              blockers: { type: 'ARRAY', items: { type: 'STRING' } },
+              risks: { type: 'ARRAY', items: { type: 'STRING' } },
+              nextActions: { type: 'ARRAY', items: { type: 'STRING' } },
+              standupSummary: { type: 'STRING' },
+            },
+            required: ['blockers', 'risks', 'nextActions', 'standupSummary'],
+            propertyOrdering: ['blockers', 'risks', 'nextActions', 'standupSummary'],
+          },
+        },
+      }),
+    });
+
+    if (!geminiResponse.ok) {
+      return fallbackResponse(res, context, `Gemini request failed with status ${geminiResponse.status}. Returned mock analysis instead.`);
+    }
+
+    const data = await geminiResponse.json();
+    const text = data?.candidates?.[0]?.content?.parts?.map((part) => part.text ?? '').join('').trim() ?? '';
+    const analysis = normalizeAnalysis(JSON.parse(text));
+
+    if (!hasUsableAnalysis(analysis)) {
+      return fallbackResponse(res, context, 'Gemini returned an empty analysis. Returned mock analysis instead.');
+    }
+
+    return res.status(200).json({ analysis, source: 'gemini' });
+  } catch (error) {
+    const message = error instanceof Error ? error.message : 'Unknown Gemini error.';
+    return fallbackResponse(res, context, `Gemini analysis failed: ${message}. Returned mock analysis instead.`);
+  }
+}

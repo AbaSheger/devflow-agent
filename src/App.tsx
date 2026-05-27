@@ -1,11 +1,5 @@
-import { useMemo, useState } from 'react';
-
-type Analysis = {
-  blockers: string[];
-  risks: string[];
-  nextActions: string[];
-  standupSummary: string;
-};
+import { useState } from 'react';
+import { analyzeProjectMock, type Analysis } from './analysis';
 
 const starterText = `Paste GitLab activity here, for example:
 - Open issues and blockers
@@ -13,44 +7,53 @@ const starterText = `Paste GitLab activity here, for example:
 - CI failure logs
 - Release or sprint status`;
 
-function analyzeProject(input: string): Analysis {
-  const normalizedInput = input.toLowerCase();
-  const hasCiFailure = /ci|pipeline|test|failed|failure|build/.test(normalizedInput);
-  const hasReviewSignal = /merge request|mr|review|approval/.test(normalizedInput);
-  const hasBlockerSignal = /blocker|blocked|waiting|dependency|cannot/.test(normalizedInput);
+type AnalysisSource = 'gemini' | 'mock';
 
-  // TODO: Replace this mock logic with Gemini-powered project analysis.
-  // TODO: Connect Google Cloud Agent Builder orchestration for multi-step reasoning.
-  // TODO: Pull live GitLab project context through GitLab MCP integration.
-  return {
-    blockers: hasBlockerSignal
-      ? ['A dependency or handoff appears to be blocking progress.']
-      : ['No explicit blocker found in the pasted notes.'],
-    risks: [
-      hasCiFailure
-        ? 'CI or test failures may delay merge readiness.'
-        : 'CI health is unknown from the provided text.',
-      hasReviewSignal
-        ? 'Merge requests may need reviewer attention.'
-        : 'Review status is unclear and should be confirmed.',
-    ],
-    nextActions: [
-      hasCiFailure ? 'Identify the failing job and assign an owner.' : 'Add current CI status to the project notes.',
-      hasReviewSignal ? 'Ask reviewers to confirm approval or requested changes.' : 'List active merge requests before the next check-in.',
-      'Capture one concrete owner for each open blocker.',
-    ],
-    standupSummary:
-      input.trim().length > 0
-        ? 'Project activity was reviewed. Focus today should be clearing blockers, confirming CI status, and moving merge requests toward review or merge.'
-        : 'No project context has been provided yet. Paste GitLab notes to generate a demo summary.',
-  };
-}
+type AnalyzeResponse = {
+  analysis?: Analysis;
+  source?: AnalysisSource;
+  error?: string;
+};
 
 function App() {
   const [projectText, setProjectText] = useState('');
   const [hasAnalyzed, setHasAnalyzed] = useState(false);
+  const [analysis, setAnalysis] = useState<Analysis>(() => analyzeProjectMock(''));
+  const [analysisSource, setAnalysisSource] = useState<AnalysisSource>('mock');
+  const [isLoading, setIsLoading] = useState(false);
+  const [errorMessage, setErrorMessage] = useState('');
 
-  const analysis = useMemo(() => analyzeProject(projectText), [projectText]);
+  async function handleAnalyze() {
+    setHasAnalyzed(true);
+    setIsLoading(true);
+    setErrorMessage('');
+
+    const fallbackAnalysis = analyzeProjectMock(projectText);
+
+    try {
+      const response = await fetch('/api/analyze', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ context: projectText }),
+      });
+
+      if (!response.ok) {
+        throw new Error(`Analysis request failed with status ${response.status}.`);
+      }
+
+      const data = (await response.json()) as AnalyzeResponse;
+
+      setAnalysis(data.analysis ?? fallbackAnalysis);
+      setAnalysisSource(data.source ?? 'mock');
+      setErrorMessage(data.error ?? '');
+    } catch (error) {
+      setAnalysis(fallbackAnalysis);
+      setAnalysisSource('mock');
+      setErrorMessage(error instanceof Error ? `${error.message} Showing mock analysis instead.` : 'Analysis failed. Showing mock analysis instead.');
+    } finally {
+      setIsLoading(false);
+    }
+  }
 
   return (
     <main className="shell">
@@ -74,13 +77,18 @@ function App() {
             placeholder={starterText}
             rows={14}
           />
-          <button type="button" onClick={() => setHasAnalyzed(true)}>
-            Analyze Project
+          <button type="button" onClick={handleAnalyze} disabled={isLoading}>
+            {isLoading ? 'Analyzing...' : 'Analyze Project'}
           </button>
         </div>
 
         <div className="output-panel" aria-live="polite">
-          <h2>Mock Analysis</h2>
+          <div className="output-heading">
+            <h2>{analysisSource === 'gemini' ? 'Gemini Analysis' : 'Mock Analysis'}</h2>
+            {hasAnalyzed ? <span className={`source-pill source-${analysisSource}`}>{analysisSource}</span> : null}
+          </div>
+          {isLoading ? <p className="status-message">Analyzing pasted project context...</p> : null}
+          {errorMessage ? <p className="error-message">{errorMessage}</p> : null}
           {hasAnalyzed ? (
             <div className="analysis-grid">
               <AnalysisList title="Blockers" items={analysis.blockers} />

@@ -130,14 +130,62 @@ button:hover {
   background: #1d5796;
 }
 
+button:disabled {
+  cursor: wait;
+  opacity: 0.72;
+}
+
 .output-panel {
   padding: 22px;
 }
 
-.output-panel h2 {
+.output-heading {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  justify-content: space-between;
   margin-bottom: 16px;
+}
+
+.output-heading h2 {
+  margin-bottom: 0;
   color: #101820;
   font-size: 1.35rem;
+}
+
+.source-pill {
+  border: 1px solid #cbd7e3;
+  border-radius: 999px;
+  padding: 4px 9px;
+  color: #425466;
+  background: #f3f7fb;
+  font-size: 0.78rem;
+  font-weight: 700;
+  text-transform: uppercase;
+}
+
+.source-gemini {
+  border-color: #9cc8a8;
+  color: #1d6b34;
+  background: #effaf2;
+}
+
+.status-message,
+.error-message {
+  margin: 0 0 14px;
+  border-radius: 6px;
+  padding: 10px 12px;
+  line-height: 1.5;
+}
+
+.status-message {
+  color: #25496a;
+  background: #eef6ff;
+}
+
+.error-message {
+  color: #7a3c10;
+  background: #fff4e8;
 }
 
 .analysis-grid {
