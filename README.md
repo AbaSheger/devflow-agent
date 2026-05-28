@@ -72,6 +72,14 @@ Build for production:
 npm run build
 ```
 
+Generate Devpost/demo screenshots:
+
+```bash
+npm run screenshots
+```
+
+The screenshot script starts the local Vite app, loads the demo page, fills the textarea with sample GitLab data, runs the existing Analyze Project flow, and saves images to `screenshots/`. If the local Gemini API route is unavailable or rate-limited, the app fallback output is still captured.
+
 ## MVP Notes
 
 This version includes a minimal Gemini API route plus mock fallback behavior. The next integration points are marked with TODO comments in the code:
