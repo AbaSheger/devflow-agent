@@ -78,7 +78,11 @@ Generate Devpost/demo screenshots:
 npm run screenshots
 ```
 
-The screenshot script starts the local Vite app, loads the demo page, fills the textarea with sample GitLab data, runs the existing Analyze Project flow, and saves images to `screenshots/`. If the local Gemini API route is unavailable or rate-limited, the app fallback output is still captured.
+By default, the screenshot script uses the deployed demo at `https://devflow-agent.vercel.app/`, fills the textarea with sample GitLab data, runs the existing Analyze Project flow, and saves images to `screenshots/`. If Gemini is unavailable or rate-limited, the app fallback output is still captured. To generate local fallback screenshots instead, run:
+
+```bash
+LOCAL_SCREENSHOT=true npm run screenshots
+```
 
 ## MVP Notes
 
