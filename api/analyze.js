@@ -1,4 +1,4 @@
-const GEMINI_MODEL = 'gemini-2.0-flash-lite';
+const GEMINI_MODEL = 'gemini-2.5-flash';
 const MAX_GEMINI_CONTEXT_CHARS = 12000;
 const MAX_GEMINI_OUTPUT_TOKENS = 512;
 const GEMINI_QUOTA_FALLBACK_MESSAGE = 'Gemini quota/rate limit reached, showing local fallback analysis.';
