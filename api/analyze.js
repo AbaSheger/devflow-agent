@@ -1,3 +1,8 @@
+const GEMINI_MODEL = 'gemini-2.0-flash-lite';
+const MAX_GEMINI_CONTEXT_CHARS = 12000;
+const MAX_GEMINI_OUTPUT_TOKENS = 512;
+const GEMINI_QUOTA_FALLBACK_MESSAGE = 'Gemini quota/rate limit reached, showing local fallback analysis.';
+
 function buildFallbackAnalysis(input) {
   const normalizedInput = input.toLowerCase();
   const hasCiFailure = /ci|pipeline|test|failed|failure|build/.test(normalizedInput);
@@ -72,6 +77,11 @@ export default async function handler(req, res) {
     return fallbackResponse(res, context, 'GEMINI_API_KEY is not configured. Returned mock analysis instead.');
   }
 
+  const trimmedContext =
+    context.length > MAX_GEMINI_CONTEXT_CHARS
+      ? `${context.slice(0, MAX_GEMINI_CONTEXT_CHARS)}\n\n[Context trimmed before Gemini analysis for demo reliability.]`
+      : context;
+
   const prompt = [
     'Analyze the pasted GitLab project context for a developer standup.',
     'Return only JSON with this exact shape:',
@@ -80,13 +90,13 @@ export default async function handler(req, res) {
     'Do not claim live GitLab access.',
     '',
     'Project context:',
-    context,
+    trimmedContext,
   ].join('\n');
 
   try {
     // TODO: Connect Google Cloud Agent Builder here when orchestration is added.
     // TODO: Replace pasted context with live GitLab MCP project context when that integration is added.
-    const geminiResponse = await fetch('https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent', {
+    const geminiResponse = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_MODEL}:generateContent`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -100,6 +110,7 @@ export default async function handler(req, res) {
           },
         ],
         generationConfig: {
+          maxOutputTokens: MAX_GEMINI_OUTPUT_TOKENS,
           responseMimeType: 'application/json',
           responseSchema: {
             type: 'OBJECT',
@@ -117,6 +128,10 @@ export default async function handler(req, res) {
     });
 
     if (!geminiResponse.ok) {
+      if (geminiResponse.status === 429) {
+        return fallbackResponse(res, context, GEMINI_QUOTA_FALLBACK_MESSAGE);
+      }
+
       return fallbackResponse(res, context, `Gemini request failed with status ${geminiResponse.status}. Returned mock analysis instead.`);
     }
 
