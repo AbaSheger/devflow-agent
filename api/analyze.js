@@ -1,4 +1,4 @@
-const GEMINI_MODEL = 'gemini-2.5-flash';
+const GEMINI_MODEL = 'gemini-3.1-flash-lite';
 const MAX_GEMINI_CONTEXT_CHARS = 12000;
 const MAX_GEMINI_OUTPUT_TOKENS = 512;
 const GEMINI_QUOTA_FALLBACK_MESSAGE = 'Gemini quota/rate limit reached, showing local fallback analysis.';
@@ -50,6 +50,77 @@ function normalizeAnalysis(value) {
   };
 }
 
+function stripMarkdownCodeFence(text) {
+  return text
+    .trim()
+    .replace(/^```(?:json)?\s*/i, '')
+    .replace(/\s*```$/i, '')
+    .trim();
+}
+
+function extractFirstJsonObject(text) {
+  const start = text.indexOf('{');
+
+  if (start === -1) {
+    return text;
+  }
+
+  let depth = 0;
+  let inString = false;
+  let isEscaped = false;
+
+  for (let index = start; index < text.length; index += 1) {
+    const character = text[index];
+
+    if (isEscaped) {
+      isEscaped = false;
+      continue;
+    }
+
+    if (character === '\\') {
+      isEscaped = true;
+      continue;
+    }
+
+    if (character === '"') {
+      inString = !inString;
+      continue;
+    }
+
+    if (inString) {
+      continue;
+    }
+
+    if (character === '{') {
+      depth += 1;
+    } else if (character === '}') {
+      depth -= 1;
+
+      if (depth === 0) {
+        return text.slice(start, index + 1);
+      }
+    }
+  }
+
+  return text.slice(start);
+}
+
+function parseGeminiAnalysis(text) {
+  const jsonText = extractFirstJsonObject(stripMarkdownCodeFence(text));
+  const parsed = JSON.parse(jsonText);
+
+  if (
+    !Array.isArray(parsed?.blockers) ||
+    !Array.isArray(parsed?.risks) ||
+    !Array.isArray(parsed?.nextActions) ||
+    typeof parsed?.standupSummary !== 'string'
+  ) {
+    throw new Error('Gemini response JSON did not match the expected analysis shape.');
+  }
+
+  return normalizeAnalysis(parsed);
+}
+
 function hasUsableAnalysis(analysis) {
   return (
     analysis.blockers.length > 0 ||
@@ -84,8 +155,11 @@ export default async function handler(req, res) {
 
   const prompt = [
     'Analyze the pasted GitLab project context for a developer standup.',
-    'Return only JSON with this exact shape:',
+    'Return only valid JSON. Do not include markdown code fences, comments, explanations, or extra text.',
+    'Use this exact JSON shape:',
     '{"blockers": string[], "risks": string[], "nextActions": string[], "standupSummary": string}',
+    'Use at most 3 concise strings in each array.',
+    'Keep standupSummary to one concise sentence.',
     'Keep items concise, practical, and grounded only in the provided context.',
     'Do not claim live GitLab access.',
     '',
@@ -137,7 +211,7 @@ export default async function handler(req, res) {
 
     const data = await geminiResponse.json();
     const text = data?.candidates?.[0]?.content?.parts?.map((part) => part.text ?? '').join('').trim() ?? '';
-    const analysis = normalizeAnalysis(JSON.parse(text));
+    const analysis = parseGeminiAnalysis(text);
 
     if (!hasUsableAnalysis(analysis)) {
       return fallbackResponse(res, context, 'Gemini returned an empty analysis. Returned mock analysis instead.');
