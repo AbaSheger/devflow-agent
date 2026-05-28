@@ -59,13 +59,50 @@ type AnalyzeResponse = {
   error?: string;
 };
 
+type GitLabContextResponse = {
+  context?: string;
+  error?: string;
+};
+
 function App() {
   const [projectText, setProjectText] = useState('');
+  const [gitlabProject, setGitlabProject] = useState('');
+  const [importMessage, setImportMessage] = useState('');
+  const [isImporting, setIsImporting] = useState(false);
   const [hasAnalyzed, setHasAnalyzed] = useState(false);
   const [analysis, setAnalysis] = useState<Analysis>(() => analyzeProjectMock(''));
   const [analysisSource, setAnalysisSource] = useState<AnalysisSource>('mock');
   const [isLoading, setIsLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
+
+  async function handleImportGitLabContext() {
+    setIsImporting(true);
+    setImportMessage('');
+
+    try {
+      const response = await fetch('/api/gitlab-context', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ projectUrlOrPath: gitlabProject }),
+      });
+      const data = (await response.json()) as GitLabContextResponse;
+
+      if (!response.ok || !data.context) {
+        throw new Error(data.error ?? `Public GitLab API import failed with status ${response.status}.`);
+      }
+
+      setProjectText(data.context);
+      setImportMessage('Public GitLab API import loaded into the project context field.');
+    } catch (error) {
+      setImportMessage(
+        error instanceof Error
+          ? error.message
+          : 'Unable to import public GitLab context. You can still load sample data or paste exported GitLab context.',
+      );
+    } finally {
+      setIsImporting(false);
+    }
+  }
 
   async function handleAnalyze() {
     setHasAnalyzed(true);
@@ -127,6 +164,10 @@ function App() {
                 <strong>Available</strong>
               </div>
               <div>
+                <span>Public GitLab API import</span>
+                <strong>Available for public projects</strong>
+              </div>
+              <div>
                 <span>Gemini analysis</span>
                 <strong>Connected</strong>
               </div>
@@ -139,8 +180,16 @@ function App() {
             <input
               id="gitlab-project"
               type="text"
-              placeholder="Optional for now, for example group/project or https://gitlab.com/group/project"
+              value={gitlabProject}
+              onChange={(event) => setGitlabProject(event.target.value)}
+              placeholder="group/project or https://gitlab.com/group/project"
             />
+            <div className="input-actions">
+              <button type="button" className="secondary-button" onClick={handleImportGitLabContext} disabled={isImporting}>
+                {isImporting ? 'Importing...' : 'Import public GitLab context'}
+              </button>
+            </div>
+            {importMessage ? <p className="import-message">{importMessage}</p> : null}
           </section>
 
           <label htmlFor="project-context">GitLab project context</label>

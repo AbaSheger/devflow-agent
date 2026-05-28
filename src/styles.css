@@ -251,6 +251,7 @@ button:disabled {
 }
 
 .status-message,
+.import-message,
 .error-message {
   margin: 0 0 14px;
   border-radius: 6px;
@@ -258,7 +259,8 @@ button:disabled {
   line-height: 1.5;
 }
 
-.status-message {
+.status-message,
+.import-message {
   color: #25496a;
   background: #eef6ff;
 }

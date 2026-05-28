@@ -2,7 +2,7 @@
 
 DevFlow Agent is a small Google Cloud Rapid Agent Hackathon MVP that helps developers turn GitLab project activity into a concise project readout.
 
-The current app is intentionally demo-focused. It accepts pasted GitLab context such as issue notes, merge request updates, CI failures, or project summaries and includes a "Load sample GitLab data" button for a quick judge-friendly demo. The app returns analysis for:
+The current app is intentionally demo-focused. It accepts pasted GitLab context such as issue notes, merge request updates, CI failures, or project summaries. Judges can use the bundled sample data, import context from a public GitLab project through the public GitLab API, or paste exported GitLab notes manually. The app returns analysis for:
 
 - blockers
 - risks
@@ -18,6 +18,13 @@ Gemini analysis is the first real integration step. If Gemini is unavailable or 
 - Vite
 - Vercel serverless API route
 
+## Demo Modes
+
+- Sample data mode: loads realistic GitLab-style issues, merge requests, CI status, reviewers, missing tests, and blockers into the textarea.
+- Public GitLab API import mode: accepts a public `gitlab.com` project URL or `namespace/project` path, fetches public project details, issues, merge requests, and pipelines without authentication, then places that context in the textarea.
+- Gemini analysis mode: sends the textarea context to the serverless Gemini route and falls back to mock/demo analysis if Gemini is unavailable.
+- GitLab MCP planned next: direct GitLab MCP context is not implemented yet and remains the next integration step.
+
 ## Architecture and Status
 
 Implemented:
@@ -26,6 +33,7 @@ Implemented:
 - Vercel deployment with a serverless analysis route
 - Gemini analysis with mock/demo fallback behavior
 - Sample GitLab workflow data for demos
+- Public GitLab API import for public projects without authentication
 
 In progress/planned:
 
