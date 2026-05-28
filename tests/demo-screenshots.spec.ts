@@ -14,18 +14,16 @@ test('captures DevFlow Agent demo screenshots', async ({ page }) => {
   await page.screenshot({ path: 'screenshots/02-sample-data-loaded.png', fullPage: true });
 
   await page.getByRole('button', { name: 'Analyze Project' }).click();
-
-  let analysisSource = 'Gemini';
-
-  try {
-    await expect(page.getByRole('heading', { name: 'Gemini Analysis' })).toBeVisible({ timeout: 45_000 });
-  } catch {
-    await expect(page.getByRole('heading', { name: 'Mock Analysis' })).toBeVisible({ timeout: 15_000 });
-    analysisSource = 'Mock';
-    console.warn('Warning: screenshot flow captured Mock Analysis instead of Gemini Analysis.');
-  }
-
+  await expect(page.getByRole('heading', { name: 'Gemini Analysis' })).toBeVisible({ timeout: 45_000 });
   await expect(page.getByRole('heading', { name: 'Daily Standup Summary' })).toBeVisible();
-  console.log(`Screenshot analysis source: ${analysisSource}`);
+  console.log('Screenshot analysis source: Gemini');
   await page.screenshot({ path: 'screenshots/03-analysis-result.png', fullPage: true });
+
+  await page.getByLabel('GitLab project URL or ID').fill('https://gitlab.com/gitlab-org/gitlab-runner');
+  await page.getByRole('button', { name: 'Import public GitLab context' }).click();
+  await expect(page.getByText('Public GitLab API import loaded into the project context field.')).toBeVisible({
+    timeout: 30_000,
+  });
+  await expect(page.getByLabel('GitLab project context')).toHaveValue(/gitlab-org\/gitlab-runner/i);
+  await page.screenshot({ path: 'screenshots/04-public-gitlab-import.png', fullPage: true });
 });
