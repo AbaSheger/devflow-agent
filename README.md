@@ -2,7 +2,7 @@
 
 DevFlow Agent is a small Google Cloud Rapid Agent Hackathon MVP that helps developers turn GitLab project activity into a concise project readout.
 
-The current app is intentionally demo-focused. It accepts pasted GitLab context such as issue notes, merge request updates, CI failures, or project summaries and returns analysis for:
+The current app is intentionally demo-focused. It accepts pasted GitLab context such as issue notes, merge request updates, CI failures, or project summaries and includes a "Load sample GitLab data" button for a quick judge-friendly demo. The app returns analysis for:
 
 - blockers
 - risks

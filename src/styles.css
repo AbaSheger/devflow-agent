@@ -97,6 +97,18 @@ label {
   font-weight: 700;
 }
 
+.input-helper {
+  margin: -6px 0 0;
+  color: #52687a;
+  line-height: 1.5;
+}
+
+.input-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
 textarea {
   width: 100%;
   min-height: 340px;
@@ -128,6 +140,16 @@ button {
 
 button:hover {
   background: #1d5796;
+}
+
+.secondary-button {
+  border: 1px solid #c6d4e2;
+  color: #1f4f82;
+  background: #f4f8fc;
+}
+
+.secondary-button:hover {
+  background: #e8f1fa;
 }
 
 button:disabled {
