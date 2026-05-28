@@ -213,7 +213,7 @@ function App() {
 
         <div className="output-panel" aria-live="polite">
           <div className="output-heading">
-            <h2>{analysisSource === 'gemini' ? 'Gemini Analysis' : 'Mock Analysis'}</h2>
+            <h2>{hasAnalyzed ? (analysisSource === 'gemini' ? 'Gemini Analysis' : 'Mock Analysis') : 'Analysis Preview'}</h2>
             {hasAnalyzed ? <span className={`source-pill source-${analysisSource}`}>{analysisSource}</span> : null}
           </div>
           {isLoading ? <p className="status-message">Analyzing pasted project context...</p> : null}
@@ -229,7 +229,10 @@ function App() {
               </section>
             </div>
           ) : (
-            <p className="empty-state">Paste GitLab notes and run the mock analyzer to see a demo output.</p>
+            <p className="empty-state">
+              Load sample GitLab data, import a public GitLab project, or paste your own project context to run the
+              analysis.
+            </p>
           )}
         </div>
       </section>
