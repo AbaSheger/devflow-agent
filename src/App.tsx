@@ -161,19 +161,19 @@ function App() {
             <div className="integration-card" aria-label="Integration status">
               <div>
                 <span>Sample GitLab data</span>
-                <strong>Available</strong>
+                <strong className="status-badge status-ready">Available</strong>
               </div>
               <div>
                 <span>Public GitLab API import</span>
-                <strong>Available for public projects</strong>
+                <strong className="status-badge status-ready">Available for public projects</strong>
               </div>
               <div>
                 <span>Gemini analysis</span>
-                <strong>Connected</strong>
+                <strong className="status-badge status-ready">Connected via Gemini 3.1 Flash Lite</strong>
               </div>
               <div>
                 <span>GitLab MCP integration</span>
-                <strong>Planned next</strong>
+                <strong className="status-badge status-planned">Planned next</strong>
               </div>
             </div>
             <label htmlFor="gitlab-project">GitLab project URL or ID</label>
