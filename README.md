@@ -18,6 +18,20 @@ Gemini analysis is the first real integration step. If Gemini is unavailable or 
 - Vite
 - Vercel serverless API route
 
+## Architecture and Status
+
+Implemented:
+
+- React UI for pasted GitLab-style project context
+- Vercel deployment with a serverless analysis route
+- Gemini analysis with mock/demo fallback behavior
+- Sample GitLab workflow data for demos
+
+In progress/planned:
+
+- GitLab MCP integration for direct project context
+- Google Cloud Agent Builder workflow orchestration
+
 ## Local Setup
 
 Install dependencies:

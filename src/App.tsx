@@ -113,6 +113,36 @@ function App() {
 
       <section className="workspace" aria-label="Project analysis workspace">
         <div className="input-panel">
+          <section className="integration-section" aria-labelledby="gitlab-integration-title">
+            <div>
+              <h2 id="gitlab-integration-title">GitLab Integration</h2>
+              <p>
+                For this demo, you can load sample GitLab data or paste exported GitLab issue/MR/CI context. Direct
+                GitLab MCP connection is the next integration step.
+              </p>
+            </div>
+            <div className="integration-card" aria-label="Integration status">
+              <div>
+                <span>Sample GitLab data</span>
+                <strong>Available</strong>
+              </div>
+              <div>
+                <span>Gemini analysis</span>
+                <strong>Connected</strong>
+              </div>
+              <div>
+                <span>GitLab MCP integration</span>
+                <strong>Planned next</strong>
+              </div>
+            </div>
+            <label htmlFor="gitlab-project">GitLab project URL or ID</label>
+            <input
+              id="gitlab-project"
+              type="text"
+              placeholder="Optional for now, for example group/project or https://gitlab.com/group/project"
+            />
+          </section>
+
           <label htmlFor="project-context">GitLab project context</label>
           <p className="input-helper">Use sample data or paste your own GitLab project context.</p>
           <div className="input-actions">

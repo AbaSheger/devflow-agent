@@ -20,6 +20,7 @@ body {
 }
 
 button,
+input,
 textarea {
   font: inherit;
 }
@@ -88,13 +89,59 @@ h1 {
 
 .input-panel {
   display: grid;
-  gap: 14px;
+  gap: 16px;
   padding: 22px;
 }
 
 label {
   color: #1f2d38;
   font-weight: 700;
+}
+
+.integration-section {
+  display: grid;
+  gap: 14px;
+  border: 1px solid #e4ebf2;
+  border-radius: 8px;
+  padding: 16px;
+  background: #fbfcfe;
+}
+
+.integration-section h2 {
+  margin-bottom: 8px;
+  color: #101820;
+  font-size: 1.18rem;
+}
+
+.integration-section p {
+  margin-bottom: 0;
+  color: #52687a;
+  line-height: 1.5;
+}
+
+.integration-card {
+  display: grid;
+  gap: 10px;
+}
+
+.integration-card div {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  justify-content: space-between;
+  border: 1px solid #dce6ef;
+  border-radius: 6px;
+  padding: 10px 12px;
+  background: #ffffff;
+}
+
+.integration-card span {
+  color: #425466;
+}
+
+.integration-card strong {
+  color: #1f4f82;
+  font-size: 0.92rem;
 }
 
 .input-helper {
@@ -121,6 +168,17 @@ textarea {
   line-height: 1.5;
 }
 
+input {
+  width: 100%;
+  min-height: 44px;
+  border: 1px solid #becbd8;
+  border-radius: 6px;
+  padding: 0 12px;
+  color: #17202a;
+  background: #ffffff;
+}
+
+input:focus,
 textarea:focus {
   outline: 3px solid rgba(39, 117, 207, 0.24);
   border-color: #2775cf;
@@ -266,5 +324,11 @@ li + li {
 
   button {
     width: 100%;
+  }
+
+  .integration-card div {
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 4px;
   }
 }
