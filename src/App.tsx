@@ -48,7 +48,7 @@ Missing tests:
 
 Blockers:
 - Vercel environment variable is configured in production but not preview.
-- Demo must use pasted context until GitLab MCP integration is implemented.
+- Authenticated/private GitLab project import remains blocked while MCP tool startup is unresolved.
 - Pipeline failure on !19 prevents merging the latest UI polish.`;
 
 type AnalysisSource = 'gemini' | 'mock';
@@ -162,8 +162,8 @@ function App() {
             <div>
               <h2 id="gitlab-integration-title">GitLab Integration</h2>
               <p>
-                For this demo, you can load sample GitLab data or paste exported GitLab issue/MR/CI context. Direct
-                GitLab MCP connection is the next integration step.
+                For this demo, you can import public GitLab project context, load sample data, or paste exported
+                GitLab issue/MR/CI context. The deployed web app does not directly use GitLab MCP.
               </p>
             </div>
             <div className="integration-card" aria-label="Integration status">
@@ -180,8 +180,8 @@ function App() {
                 <strong className="status-badge status-ready">Connected via Gemini 3.1 Flash Lite</strong>
               </div>
               <div>
-                <span>GitLab MCP integration</span>
-                <strong className="status-badge status-planned">Planned next</strong>
+                <span>GitLab MCP</span>
+                <strong className="status-badge status-planned">OAuth configured, tool startup blocked</strong>
               </div>
             </div>
             <label htmlFor="gitlab-project">GitLab project URL or ID</label>

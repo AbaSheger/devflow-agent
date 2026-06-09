@@ -32,7 +32,9 @@ Gemini analysis is the first real integration step. If Gemini is unavailable or 
 - Sample data mode: loads realistic GitLab-style issues, merge requests, CI status, reviewers, missing tests, and blockers into the textarea.
 - Public GitLab API import mode: accepts a public `gitlab.com` project URL or `namespace/project` path, fetches public project details, issues, merge requests, and pipelines without authentication, then places that context in the textarea.
 - Gemini analysis mode: sends the textarea context to the serverless Gemini route and falls back to mock/demo analysis if Gemini is unavailable.
-- GitLab MCP planned next: direct GitLab MCP context is not implemented yet and remains the next integration step.
+- GitLab MCP status: OAuth was configured through Codex, but tool startup is blocked; the deployed web app does not directly use MCP.
+
+GitLab MCP was configured through Codex using the official GitLab MCP endpoint and OAuth. However, the MCP tool startup failed during the initialize step, so the hosted submission uses GitLabs public API as the stable integration path. MCP remains documented as the next authenticated workflow.
 
 ## Architecture and Status
 
@@ -47,7 +49,7 @@ Implemented:
 
 In progress/planned:
 
-- GitLab MCP integration for direct project context
+- GitLab MCP authenticated workflow after the tool startup issue is resolved
 - Google Cloud Agent Builder workflow orchestration
 
 ## Local Setup
@@ -101,4 +103,4 @@ Local mode allows the clearly labeled mock fallback because the Vite development
 This version includes a minimal Gemini API route plus mock fallback behavior. The next integration points are marked with TODO comments in the code:
 
 - Google Cloud Agent Builder orchestration
-- GitLab MCP integration for live project context
+- GitLab MCP authenticated workflow after the tool startup issue is resolved
