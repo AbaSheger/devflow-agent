@@ -1,5 +1,5 @@
-import { useState } from 'react';
-import { analyzeProjectMock, type Analysis } from './analysis';
+import { useMemo, useState } from 'react';
+import { analyzeProjectMock, createActionPack, type Analysis } from './analysis';
 
 const starterText = `Paste GitLab activity here, for example:
 - Open issues and blockers
@@ -74,6 +74,14 @@ function App() {
   const [analysisSource, setAnalysisSource] = useState<AnalysisSource>('mock');
   const [isLoading, setIsLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
+  const [copiedAction, setCopiedAction] = useState('');
+  const actionPack = useMemo(() => createActionPack(analysis), [analysis]);
+
+  async function handleCopy(label: string, content: string) {
+    await navigator.clipboard.writeText(content);
+    setCopiedAction(label);
+    window.setTimeout(() => setCopiedAction(''), 1800);
+  }
 
   async function handleImportGitLabContext() {
     setIsImporting(true);
@@ -219,15 +227,52 @@ function App() {
           {isLoading ? <p className="status-message">Analyzing pasted project context...</p> : null}
           {errorMessage ? <p className="error-message">{errorMessage}</p> : null}
           {hasAnalyzed ? (
-            <div className="analysis-grid">
-              <AnalysisList title="Blockers" items={analysis.blockers} />
-              <AnalysisList title="Risks" items={analysis.risks} />
-              <AnalysisList title="Recommended Next Actions" items={analysis.nextActions} />
-              <section className="summary">
-                <h3>Daily Standup Summary</h3>
-                <p>{analysis.standupSummary}</p>
+            <>
+              <div className="analysis-grid">
+                <AnalysisList title="Blockers" items={analysis.blockers} />
+                <AnalysisList title="Risks" items={analysis.risks} />
+                <AnalysisList title="Recommended Next Actions" items={analysis.nextActions} />
+                <section className="summary">
+                  <h3>Daily Standup Summary</h3>
+                  <p>{analysis.standupSummary}</p>
+                </section>
+              </div>
+
+              <section className="action-pack" aria-labelledby="action-pack-title">
+                <div className="action-pack-heading">
+                  <div>
+                    <h2 id="action-pack-title">Action Pack</h2>
+                    <p>Copy-ready drafts generated in your browser from this analysis. Nothing is posted to GitLab.</p>
+                  </div>
+                </div>
+                <div className="action-pack-grid">
+                  <ActionCard
+                    title="Daily standup message"
+                    content={actionPack.standupMessage}
+                    copiedAction={copiedAction}
+                    onCopy={handleCopy}
+                  />
+                  <ActionCard
+                    title="GitLab MR comment draft"
+                    content={actionPack.mergeRequestComment}
+                    copiedAction={copiedAction}
+                    onCopy={handleCopy}
+                  />
+                  <ActionCard
+                    title="Issue triage checklist"
+                    content={actionPack.issueTriageChecklist}
+                    copiedAction={copiedAction}
+                    onCopy={handleCopy}
+                  />
+                  <ActionCard
+                    title="CI failure action plan"
+                    content={actionPack.ciFailureActionPlan}
+                    copiedAction={copiedAction}
+                    onCopy={handleCopy}
+                  />
+                </div>
               </section>
-            </div>
+            </>
           ) : (
             <p className="empty-state">
               Load sample GitLab data, import a public GitLab project, or paste your own project context to run the
@@ -237,6 +282,32 @@ function App() {
         </div>
       </section>
     </main>
+  );
+}
+
+function ActionCard({
+  title,
+  content,
+  copiedAction,
+  onCopy,
+}: {
+  title: string;
+  content: string;
+  copiedAction: string;
+  onCopy: (label: string, content: string) => Promise<void>;
+}) {
+  const wasCopied = copiedAction === title;
+
+  return (
+    <section className="action-card">
+      <div className="action-card-heading">
+        <h3>{title}</h3>
+        <button type="button" className="copy-button" onClick={() => onCopy(title, content)}>
+          {wasCopied ? 'Copied' : 'Copy'}
+        </button>
+      </div>
+      <pre>{content}</pre>
+    </section>
   );
 }
 

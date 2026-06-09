@@ -1,7 +1,7 @@
 import { defineConfig, devices } from '@playwright/test';
 
 const isLocalScreenshot = process.env.LOCAL_SCREENSHOT === 'true';
-const baseURL = isLocalScreenshot ? 'http://127.0.0.1:5173' : 'https://devflow-agent.vercel.app';
+const baseURL = isLocalScreenshot ? 'http://127.0.0.1:5173' : 'https://devflow-agent.vercel.app/';
 
 export default defineConfig({
   testDir: './tests',

@@ -319,6 +319,70 @@ button:disabled {
   gap: 14px;
 }
 
+.action-pack {
+  margin-top: 24px;
+  border-top: 1px solid #dce6ef;
+  padding-top: 22px;
+}
+
+.action-pack-heading h2 {
+  margin-bottom: 6px;
+  color: #101820;
+  font-size: 1.35rem;
+}
+
+.action-pack-heading p {
+  margin-bottom: 16px;
+  color: #52687a;
+  line-height: 1.5;
+}
+
+.action-pack-grid {
+  display: grid;
+  gap: 14px;
+}
+
+.action-card {
+  border: 1px solid #dce6ef;
+  border-radius: 8px;
+  padding: 16px;
+  background: #fbfcfe;
+}
+
+.action-card-heading {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 12px;
+}
+
+.action-card-heading h3 {
+  margin-bottom: 0;
+  color: #1f2d38;
+  font-size: 1rem;
+}
+
+.copy-button {
+  min-height: 34px;
+  padding: 0 12px;
+  color: #1f4f82;
+  background: #e8f1fa;
+  font-size: 0.85rem;
+}
+
+.copy-button:hover {
+  background: #d9e9f8;
+}
+
+.action-card pre {
+  margin: 0;
+  color: #425466;
+  font-family: inherit;
+  line-height: 1.55;
+  white-space: pre-wrap;
+}
+
 .summary {
   border: 1px solid #e4ebf2;
   border-radius: 8px;
@@ -370,6 +434,10 @@ li + li {
 
   button {
     width: 100%;
+  }
+
+  .copy-button {
+    width: fit-content;
   }
 
   .integration-card div {

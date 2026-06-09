@@ -9,6 +9,15 @@ The current app is intentionally demo-focused. It accepts pasted GitLab context 
 - recommended next actions
 - daily standup summary
 
+After analysis, the frontend also builds a copy-ready Action Pack from the returned analysis without making another API call. It includes:
+
+- daily standup message
+- GitLab merge request comment draft
+- issue triage checklist
+- CI failure action plan
+
+Each draft has a copy button. The app does not post or write anything to GitLab.
+
 Gemini analysis is the first real integration step. If Gemini is unavailable or the API key is missing, the app clearly falls back to mock/demo analysis so the MVP still works.
 
 ## Tech Stack
@@ -34,6 +43,7 @@ Implemented:
 - Gemini analysis with mock/demo fallback behavior
 - Sample GitLab workflow data for demos
 - Public GitLab API import for public projects without authentication
+- Frontend-generated Action Pack with copy-ready drafts
 
 In progress/planned:
 
@@ -78,11 +88,13 @@ Generate Devpost/demo screenshots:
 npm run screenshots
 ```
 
-By default, the screenshot script uses the deployed demo at `https://devflow-agent.vercel.app/`, fills the textarea with sample GitLab data, runs the existing Analyze Project flow, and saves images to `screenshots/`. If Gemini is unavailable or rate-limited, the app fallback output is still captured. To generate local fallback screenshots instead, run:
+By default, the screenshot script uses the deployed app at `https://devflow-agent.vercel.app/`, fills the textarea with sample GitLab data, runs the Analyze Project flow, requires Gemini Analysis and the Action Pack to be visible, and saves images to `screenshots/`. To run against the local Vite app instead, use:
 
 ```bash
 LOCAL_SCREENSHOT=true npm run screenshots
 ```
+
+Local mode allows the clearly labeled mock fallback because the Vite development server does not provide the serverless API routes. The public GitLab import screenshot runs only against the deployed app.
 
 ## MVP Notes
 
